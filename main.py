@@ -20,8 +20,10 @@ def main():
 	closedPath = Path()
 	closedPath.nodes = myPathfinder.closedList;
 
-	myMap.printMapWithPath(path)
-	myMap.printMapWithPath(closedPath)
+	path.printPath((myMap.width, myMap.height))
+
+	# myMap.printMapWithPath(path)
+	# myMap.printMapWithPath(closedPath)
 
 ################################
 

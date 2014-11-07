@@ -10,6 +10,7 @@ class Pathfinder:
 		self.targetFound = False
 
 	def findPath(self, pMap, start, end):
+		"""Initializes the A* to find a way from start to end, based on the nodes in pMap"""
 		print "%d, %d \n" % start
 		print "%d, %d \n" % end
 		
@@ -26,30 +27,28 @@ class Pathfinder:
 		
 		# while(len(self.openList) > 0):
 		j = 0
-		while(len(self.openList) and j < 2000):
+		while(len(self.openList)):
+			# if target is found or all nodes have been checked, the search is finished
 			if(self.checkNode(pMap, start, end)):
 				break
-			j += 1
-		print j
 
 		if(self.targetFound):
 			path = Path()
 			self.extractPath(path)
-			print "target: %d, %d \n" % (self.closedList[-1].x, self.closedList[-1].y)
 			return path
 		else:
 			return None
 		
 	def checkNode(self, pMap, start, end):
+		"""Steps the A* algorithm one step ahead"""
+		# move the first node of open list to the closed list
 		currentNode = self.openList[0]
 		self.closedList.append(currentNode)
 		del self.openList[0]
 
 		# check if the current node, that is, the last one added to the closed list, is the taget node
 		if( currentNode.x == end[0] and currentNode.y == end[1] ):
-			print "found: %d, %d\n" % (end[0], end[1])
-			print "node: %d, %d\n" % (currentNode.x, currentNode.y)
-			# target found! abort! abort!!
+			# target found! VICORY! return true!!
 			self.targetFound = True
 			return True
 
@@ -94,6 +93,7 @@ class Pathfinder:
 		return False
 
 	def getHeuristics(self, coords1, coords2):
+		"""Returns the H value for the node with coords1 relative to the node with coords2"""
 		dx = abs(coords1[0] - coords2[0])
 		dy = abs(coords1[1] - coords2[1])
 		return 10 * (dx + dy)
@@ -103,19 +103,19 @@ class Pathfinder:
 		# last element in the closedList will be the target node if one was found
 		currentNode = self.closedList[-1]
 		pPath.nodes.append(currentNode)
+
+		# steps through all the parents from the target node to the start node and add them to the path
 		while(currentNode):
 			pPath.nodes.append(currentNode)
 			currentNode = currentNode.parentNode
 
+		# make the path go from start to target instead of the other way around
 		pPath.nodes.reverse()
 
-		print "path length: %d" % len(pPath.nodes)
-
 	def get1DCoordinate(self, node, mapWidth):
+		"""Returns the map list index for the current node based on the x and y coordinates"""
 		return node.x + node.y * mapWidth
 
 	def checkIfInList(self, list, node):
+		"""Returns True if the node is in the passed in list, based on the x and y coordinates, else False"""
 		return any((obj.x == node.x and obj.y == node.y) for obj in list)
-
-	def printPath(self):
-		"""to be continued"""
