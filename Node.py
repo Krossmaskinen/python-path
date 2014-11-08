@@ -33,6 +33,7 @@ class Node:
 			Making it easier for the pathfinder to find the neighbours
 			straight = 10 G points
 			diagonal = 14 G points
+			Must be called after the entire map is loaded
 		"""
 
 		if(self.y > 0):

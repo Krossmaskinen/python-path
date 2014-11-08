@@ -40,7 +40,7 @@ class Pathfinder:
 			return None
 		
 	def checkNode(self, pMap, start, end):
-		"""Steps the A* algorithm one step ahead"""
+		"""Updates the A* algorithm one step"""
 		# move the first node of open list to the closed list
 		currentNode = self.openList[0]
 		self.closedList.append(currentNode)
@@ -63,6 +63,7 @@ class Pathfinder:
 			# check if node is walkable
 			nodeWalkable = False
 			if (neighbour['node'].type == pMap.types["open"]):
+				# check if a horizontal/vertical neighbour is a wall. If so it's not walkable
 				nodeWalkable = True
 
 			if( nodeInClosedList == False and nodeWalkable ):
