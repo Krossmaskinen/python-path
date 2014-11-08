@@ -63,6 +63,28 @@ class Node:
 				coord = self.get1DCoordinate((self.x + 1, self.y + 1))
 				self.neighbours['bottom right'] = self.createNeighbour((self.x + 1, self.y + 1), pMap.nodes[coord], 14)
 
+		# remove neighbours that cut corners if top, right, bottom or left is a wall
+		if( 'top' in self.neighbours and self.neighbours['top']['node'].type == 1 ):
+			if 'top left' in self.neighbours:
+				del self.neighbours['top left']
+			if 'top right' in self.neighbours:
+				del self.neighbours['top right']
+		if( 'right' in self.neighbours and self.neighbours['right']['node'].type == 1 ):
+			if 'top right' in self.neighbours:
+				del self.neighbours['top right']
+			if 'bottom right' in self.neighbours:
+				del self.neighbours['bottom right']
+		if( 'bottom' in self.neighbours and self.neighbours['bottom']['node'].type == 1 ):
+			if 'bottom right' in self.neighbours:
+				del self.neighbours['bottom right']
+			if 'bottom left' in self.neighbours:
+				del self.neighbours['bottom left']
+		if( 'left' in self.neighbours and self.neighbours['left']['node'].type == 1 ):
+			if 'bottom left' in self.neighbours:
+				del self.neighbours['bottom left']
+			if 'top left' in self.neighbours:
+				del self.neighbours['top left']
+
 	def createNeighbour(self, coords, node, g):
 		return {
 			"coords": coords,

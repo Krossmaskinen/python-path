@@ -30,9 +30,9 @@ class Pathfinder:
 		closedPath = Path()
 		while(len(self.openList)):
 			# if target is found or all nodes have been checked, the search is finished
-			bulle = raw_input(">")
-			closedPath.nodes = self.closedList
-			pMap.printMapWithPath(closedPath)
+			# bulle = raw_input(">")
+			# closedPath.nodes = self.closedList
+			# pMap.printMapWithPath(closedPath)
 			if(self.checkNode(pMap, start, end)):
 				break
 
@@ -69,19 +69,20 @@ class Pathfinder:
 			if(neighbour['node'].type == pMap.types["open"]):
 				# check if a horizontal/vertical neighbour is a wall. If so it's not walkable
 
-				if( key == "top left" ):
-					if( currentNode.neighbours['top']['node'].type == pMap.types["wall"] or currentNode.neighbours['left']['node'].type == pMap.types["wall"] ):
-						nodeWalkable = False
-				elif( key == "top right" ):
-					if( currentNode.neighbours['top']['node'].type == pMap.types["wall"] or currentNode.neighbours['right']['node'].type == pMap.types["wall"] ):
-						nodeWalkable = False
-				elif( key == "bottom left" ):
-					if( currentNode.neighbours['bottom']['node'].type == pMap.types["wall"] or currentNode.neighbours['left']['node'].type == pMap.types["wall"] ):
-						nodeWalkable = False
-				elif( key == "bottom right" ):
-					if( currentNode.neighbours['bottom']['node'].type == pMap.types["wall"] or currentNode.neighbours['right']['node'].type == pMap.types["wall"] ):
-						nodeWalkable = False
-				else:
+				# if( key == "top left" ):
+				# 	if( currentNode.neighbours['top']['node'].type == pMap.types["wall"] or currentNode.neighbours['left']['node'].type == pMap.types["wall"] ):
+				# 		nodeWalkable = False
+				# elif( key == "top right" ):
+				# 	if( currentNode.neighbours['top']['node'].type == pMap.types["wall"] or currentNode.neighbours['right']['node'].type == pMap.types["wall"] ):
+				# 		nodeWalkable = False
+				# elif( key == "bottom left" ):
+				# 	if( currentNode.neighbours['bottom']['node'].type == pMap.types["wall"] or currentNode.neighbours['left']['node'].type == pMap.types["wall"] ):
+				# 		nodeWalkable = False
+				# elif( key == "bottom right" ):
+				# 	if( currentNode.neighbours['bottom']['node'].type == pMap.types["wall"] or currentNode.neighbours['right']['node'].type == pMap.types["wall"] ):
+				# 		print "yeah"
+				# 		nodeWalkable = False
+				# else:
 					nodeWalkable = True
 						
 
