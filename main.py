@@ -5,7 +5,7 @@ from Path import *
 from Pathfinder import *
 
 def main():
-	im = Image.open("map.png", "r")
+	im = Image.open("map3.png", "r")
 	pixels = list(im.getdata())
 	myMap = Map()
 	# create a map from the image
@@ -20,10 +20,10 @@ def main():
 	closedPath = Path()
 	closedPath.nodes = myPathfinder.closedList;
 
-	# path.printPath((myMap.width, myMap.height))
-
-	myMap.printMapWithPath(path)
-	# myMap.printMapWithPath(closedPath)
+	if path:
+		myMap.printMapWithPath(path)
+	else:
+		print "no path found"
 
 ################################
 

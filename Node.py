@@ -65,25 +65,17 @@ class Node:
 
 		# remove neighbours that cut corners if top, right, bottom or left is a wall
 		if( 'top' in self.neighbours and self.neighbours['top']['node'].type == 1 ):
-			if 'top left' in self.neighbours:
-				del self.neighbours['top left']
-			if 'top right' in self.neighbours:
-				del self.neighbours['top right']
+			self.neighbours.pop('top left', None)
+			self.neighbours.pop('top right', None)
 		if( 'right' in self.neighbours and self.neighbours['right']['node'].type == 1 ):
-			if 'top right' in self.neighbours:
-				del self.neighbours['top right']
-			if 'bottom right' in self.neighbours:
-				del self.neighbours['bottom right']
+			self.neighbours.pop('top right', None)
+			self.neighbours.pop('bottom right', None)
 		if( 'bottom' in self.neighbours and self.neighbours['bottom']['node'].type == 1 ):
-			if 'bottom right' in self.neighbours:
-				del self.neighbours['bottom right']
-			if 'bottom left' in self.neighbours:
-				del self.neighbours['bottom left']
+			self.neighbours.pop('bottom right', None)
+			self.neighbours.pop('bottom left', None)
 		if( 'left' in self.neighbours and self.neighbours['left']['node'].type == 1 ):
-			if 'bottom left' in self.neighbours:
-				del self.neighbours['bottom left']
-			if 'top left' in self.neighbours:
-				del self.neighbours['top left']
+			self.neighbours.pop('bottom left', None)
+			self.neighbours.pop('top left', None)
 
 	def createNeighbour(self, coords, node, g):
 		return {

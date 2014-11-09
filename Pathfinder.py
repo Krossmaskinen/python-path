@@ -22,20 +22,15 @@ class Pathfinder:
 		if(targetNode.type == pMap.types["wall"]):
 			return None
 
+		# add the starting node to the list and start the A*
 		self.openList.append(currentNode)
 		index = len(self.openList) - 1
-		
-		# while(len(self.openList) > 0):
-		j = 0
-		closedPath = Path()
-		while(len(self.openList)):
-			# if target is found or all nodes have been checked, the search is finished
-			# bulle = raw_input(">")
-			# closedPath.nodes = self.closedList
-			# pMap.printMapWithPath(closedPath)
-			if(self.checkNode(pMap, start, end)):
-				break
 
+		# as long as there're items in the open list and the target is not found, keep searching
+		while(len(self.openList) and not self.targetFound):
+			self.checkNode(pMap, start, end)
+
+		# if the target is found, extract the path and return it, otherwise return None
 		if(self.targetFound):
 			path = Path()
 			self.extractPath(path)
@@ -46,9 +41,8 @@ class Pathfinder:
 	def checkNode(self, pMap, start, end):
 		"""Updates the A* algorithm one step"""
 		# move the first node of open list to the closed list
-		currentNode = self.openList[0]
+		currentNode = self.openList.pop(0)
 		self.closedList.append(currentNode)
-		del self.openList[0]
 
 		# check if the current node, that is, the last one added to the closed list, is the taget node
 		if( currentNode.x == end[0] and currentNode.y == end[1] ):
@@ -57,6 +51,16 @@ class Pathfinder:
 			return True
 
 		# add neighbours to openList
+		self.checkNeighbours(currentNode, pMap, start, end)
+
+		# sort openList on F value
+		self.openList.sort(key = operator.attrgetter("F"))
+
+		# no path found yet
+		return False
+
+	def checkNeighbours(self, currentNode, pMap, start, end):
+		"""Check for walkable neighbours to the current node being checked"""
 		for key in currentNode.neighbours:
 			neighbour = currentNode.neighbours[key]
 
@@ -68,51 +72,29 @@ class Pathfinder:
 			nodeWalkable = False
 			if(neighbour['node'].type == pMap.types["open"]):
 				# check if a horizontal/vertical neighbour is a wall. If so it's not walkable
-
-				# if( key == "top left" ):
-				# 	if( currentNode.neighbours['top']['node'].type == pMap.types["wall"] or currentNode.neighbours['left']['node'].type == pMap.types["wall"] ):
-				# 		nodeWalkable = False
-				# elif( key == "top right" ):
-				# 	if( currentNode.neighbours['top']['node'].type == pMap.types["wall"] or currentNode.neighbours['right']['node'].type == pMap.types["wall"] ):
-				# 		nodeWalkable = False
-				# elif( key == "bottom left" ):
-				# 	if( currentNode.neighbours['bottom']['node'].type == pMap.types["wall"] or currentNode.neighbours['left']['node'].type == pMap.types["wall"] ):
-				# 		nodeWalkable = False
-				# elif( key == "bottom right" ):
-				# 	if( currentNode.neighbours['bottom']['node'].type == pMap.types["wall"] or currentNode.neighbours['right']['node'].type == pMap.types["wall"] ):
-				# 		print "yeah"
-				# 		nodeWalkable = False
-				# else:
-					nodeWalkable = True
-						
-
+				nodeWalkable = True		
 
 			if( nodeInClosedList == False and nodeWalkable ):
-				# calculate G - the G value of the parent plus the G value of this node relative to it's parent between this node and the starting node
-				# check if this node has a parent. If not, set currentNode as the parent. If it has, compare the parent's G + this node's G and currentNode's G + this node's G.
-				# Set whatever node that gives the lowest G value as the parent
-				if( not neighbour['node'].parentNode):
-					neighbour['node'].parentNode = currentNode
-					neighbour['node'].G = currentNode.G + neighbour['g']
-				elif( currentNode.G + neighbour['g'] < neighbour['node'].parentNode.G + neighbour['g'] ):
-					neighbour['node'].parentNode = currentNode
-					neighbour['node'].G = currentNode.G + neighbour['g']
-
+				# set parent
+				self.checkNewParent(neighbour, currentNode)
 				# calculate H - the distance between this node and the end node
 				neighbour['node'].H = self.getHeuristics(neighbour['coords'], end)
-
 				# calculate F
 				neighbour['node'].F = neighbour['node'].G + neighbour['node'].H
-				# add to open list
-
+				# add to open list if not already in it
 				if( not self.checkIfInList(self.openList, neighbour['node']) ):
 					self.openList.append(neighbour['node'])
 
-		# sort openList on F value
-		self.openList.sort(key = operator.attrgetter("F"))
-
-		# no path found yet
-		return False
+	def checkNewParent(self, neighbour, pParent):
+		"""Calculate G - the G value of the parent plus the G value of this node relative to it's parent between this node and the starting node
+		check if this node has a parent. If not, set currentNode as the parent. If it has, compare the parent's G + this node's G and currentNode's G + this node's G.
+		Set whatever node that gives the lowest G value as the parent"""
+		if( not neighbour['node'].parentNode):
+			neighbour['node'].parentNode = pParent
+			neighbour['node'].G = pParent.G + neighbour['g']
+		elif( pParent.G + neighbour['g'] < neighbour['node'].parentNode.G + neighbour['g'] ):
+			neighbour['node'].parentNode = pParent
+			neighbour['node'].G = pParent.G + neighbour['g']
 
 	def getHeuristics(self, coords1, coords2):
 		"""Returns the H value for the node with coords1 relative to the node with coords2"""
