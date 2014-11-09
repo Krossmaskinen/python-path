@@ -11,13 +11,15 @@ class GraphicsManager:
 		self.loadImages()
 
 	def loadImages(self):
+		graphicFolder = "graphics/"
 		self.typeImages = {
-			"open": "open.png",
-			"wall": "wall.png",
-			"path": "path.png",
-			"start": "start.png",
-			"end": "end.png",
-			"ninja": "ninja.png"
+			"open": graphicFolder + "open.png",
+			"wall": graphicFolder + "wall.png",
+			"path": graphicFolder + "path.png",
+			"start": graphicFolder + "start.png",
+			"end": graphicFolder + "end.png",
+			"ninja": graphicFolder + "ninja.png",
+			"selected": graphicFolder + "selected.png"
 		}
 		for key in self.typeImages:
 			self.images[key] = pygame.image.load(self.typeImages[key])
@@ -27,14 +29,14 @@ class GraphicsManager:
 		"""Initializes pygame window"""
 		self.screen = pygame.display.set_mode(size)
 
-	def render(self, pMap, pPath, pEntity):
+	def render(self, pMap, pPath, pEntities):
 		self.screen.fill( (0,0,0) )
 		self.printMap(pMap)
 		# sometimes there might not be a path to display
 		if(pPath):
 			self.printPath(pPath)
 
-		self.printEntity(pEntity)
+		self.printEnties(pEntities)
 		pygame.display.flip()
 
 	def printMap(self, pMap):
@@ -59,6 +61,9 @@ class GraphicsManager:
 			else:
 				self.screen.blit(self.images["start"], coords)
 
-	def printEntity(self, pEntity):
-		coords = (pEntity.pos[0] * self.tileSize, pEntity.pos[1] * self.tileSize)
-		self.screen.blit(self.images["ninja"], coords)
+	def printEnties(self, pEntities):
+		for entity in pEntities:
+			coords = (entity.pos[0] * self.tileSize, entity.pos[1] * self.tileSize)
+			if( entity.isSelected ):
+				self.screen.blit(self.images["selected"], coords)
+			self.screen.blit(self.images["ninja"], coords)

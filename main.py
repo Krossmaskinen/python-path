@@ -22,7 +22,7 @@ def main():
 	gameRunning = True
 	tileSize = 24
 
-	im = Image.open("map4.png", "r")
+	im = Image.open("graphics/map4.png", "r")
 	pixels = list(im.getdata())
 	myMap = Map(tileSize)
 	# create a map from the image
@@ -36,7 +36,14 @@ def main():
 	startCoord = (0, 0)
 	endCoord = (0, 0)
 
-	ninja = Entity("ninja")
+	ninja1 = Entity("ninja")
+	ninja2 = Entity("ninja")
+	ninja2.setPosition((5, 0))
+
+	ninjas = [ninja1, ninja2]
+
+	selectedNinja = ninja1
+	ninja1.select()
 
 	while(gameRunning):
 		for event in pygame.event.get():
@@ -49,21 +56,26 @@ def main():
 				mouseTilePos = getTileCoords(event.pos, tileSize)
 				if event.button == 3:
 					# set end pos
-					startCoord = ninja.getTilePos()
-					print "startcoord:", startCoord
-					print "endcoord: ", endCoord
+					startCoord = selectedNinja.getTilePos()
 					endCoord = mouseTilePos
-					path = myPathfinder.findPath(myMap, startCoord, endCoord)
+					path = myPathfinder.findPath(myMap, startCoord, endCoord, ninjas)
 					if( not path ):
 						print "no path"
 					else:
-						ninja.setPath(path)
+						selectedNinja.setPath(path)
 				elif event.button == 1:
 					# select ninja
-					pass
+					for ninja in ninjas:
+						ninja.unselect()
+						ninjaPos = ninja.getTilePos()
+						if ninjaPos[0] == mouseTilePos[0] and ninjaPos[1] == mouseTilePos[1]:
+							selectedNinja = ninja
+							ninja.select()
 
-		ninja.update()
-		graphicsMgr.render(myMap, path, ninja)
+		for ninja in ninjas:
+			ninja.update(myMap, myPathfinder, ninjas)
+
+		graphicsMgr.render(myMap, path, ninjas)
 
 ################################
 

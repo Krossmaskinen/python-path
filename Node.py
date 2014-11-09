@@ -89,3 +89,6 @@ class Node:
 
 	def get1DCoordinate(self, coords):
 		return coords[0] + coords[1] * self.mapWidth
+
+	def getTilePos(self):
+		return ( int(self.x + 0.5), int(self.y + 0.5) )
