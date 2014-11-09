@@ -1,4 +1,5 @@
 from PIL import Image
+
 from Map import *
 from Node import *
 from Path import *
@@ -27,4 +28,5 @@ def main():
 
 ################################
 
-main()
+if __name__ == "__main__":
+	main()
