@@ -4,7 +4,7 @@ from Node import *
 
 class Map:
 
-	def __init__(self):
+	def __init__(self, tileSize = 1):
 		# map node type
 		self.types = {"open": 0, "wall": 1}
 		self.nodes = []
@@ -12,6 +12,7 @@ class Map:
 		self.roadColor = (255, 255, 255)
 		self.width = 0
 		self.height = 0
+		self.tileSize = tileSize
 
 	def printMap(self):
 		wallIcon = "0"

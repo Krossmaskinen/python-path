@@ -5,21 +5,30 @@ import operator
 
 class Pathfinder:
 	def __init__(self):
+		self.debug = False
 		self.openList = []
 		self.closedList = []
 		self.targetFound = False
 
+	def resetPath(self, nodes):
+		del self.closedList[:]
+		del self.openList[:]
+		self.targetFound = False
+		for node in nodes:
+			node.parentNode = None
+
 	def findPath(self, pMap, start, end):
+		self.resetPath(pMap.nodes)
 		"""Initializes the A* to find a way from start to end, based on the nodes in pMap"""
-		print "%d, %d \n" % start
-		print "%d, %d \n" % end
+		if( self.debug ): print "%d, %d \n" % start
+		if( self.debug ): print "%d, %d \n" % end
 		
 		self.targetFound = False
 		currentNode = pMap.getNode((start[0], start[1]))
 		targetNode = pMap.getNode((end[0], end[1]))
 
 		# cancel if the target is unreachable
-		if(targetNode.type == pMap.types["wall"]):
+		if( currentNode.type == pMap.types["wall"] or targetNode.type == pMap.types["wall"]):
 			return None
 
 		# add the starting node to the list and start the A*
