@@ -1,6 +1,7 @@
 import math
 
 from Path import *
+import Globals
 
 class Entity:
 	idCounter = 0
@@ -10,6 +11,8 @@ class Entity:
 		self.debug = False
 		self.type = type
 		self.pos = [0, 0]
+		self.prevPos = []
+		self.prevTile = []
 		self.currentTarget = None
 		self.path = None
 		self.prevPath = None
@@ -19,9 +22,19 @@ class Entity:
 		self.isSelected = False
 		self.isBlocked = False
 
+		self.currentState = None
+
+		self.ChangeState(Globals.gStates["Idle"])
+
 	def setId(self):
 		self.id = Entity.idCounter
 		Entity.idCounter += 1
+
+	def ChangeState(self, pNewState):
+		if( self.currentState ):
+			self.currentState.Exit(self)
+		self.currentState = pNewState
+		self.currentState.Enter(self)
 
 	def getDirection(self, start, end):
 		# normalize and return the direction
@@ -42,31 +55,31 @@ class Entity:
 		return math.sqrt(xv + yv)
 	
 	def setPosition(self, coords):
-		if( self.currentTarget ):
-			if( self.debug ): print self.currentTarget.x, self.currentTarget.y
-			currentDistance = self.getDistance(self.pos, (self.currentTarget.x, self.currentTarget.y))
-			newDistance = self.getDistance(coords, (self.currentTarget.x, self.currentTarget.y))
+		if( coords ):
+			if( self.currentTarget ):
+				if( self.debug ): print self.currentTarget.pos[0], self.currentTarget.pos[1]
+				currentDistance = self.getDistance(self.pos, (self.currentTarget.pos[0], self.currentTarget.pos[1]))
+				newDistance = self.getDistance(coords, (self.currentTarget.pos[0], self.currentTarget.pos[1]))
 
-			# target is reached or passed
-			if(currentDistance < newDistance):
-				if( self.debug ): print "snap"
-				self.pos[0], self.pos[1] = self.currentTarget.x, self.currentTarget.y
-			else: 
-				if( self.debug ): print "move"
+				# target is reached or passed
+				if(currentDistance < newDistance):
+					if( self.debug ): print "snap"
+					self.pos[0], self.pos[1] = self.currentTarget.pos[0], self.currentTarget.pos[1]
+				else: 
+					if( self.debug ): print "move"
+					self.pos[0], self.pos[1] = coords[0], coords[1]
+			else:
+				if( self.debug ): print "teleport"
 				self.pos[0], self.pos[1] = coords[0], coords[1]
-		else:
-			if( self.debug ): print "teleport"
-			self.pos[0], self.pos[1] = coords[0], coords[1]
 
-		if( self.debug ): print "new pos %d, %d" % (self.pos[0], self.pos[1])
+			if( self.debug ): print "new pos %d, %d" % (self.pos[0], self.pos[1])
 
 	def setPath(self, path):
 		self.currentTarget = None
 		self.path = path
 		self.prevPath = Path()
 
-	def moveAlongPath(self, pEntities = None):
-		self.moving = True
+	def moveAlongPath(self):
 		validPath = False
 
 		if( len(self.path.nodes) > 0 ):
@@ -79,61 +92,98 @@ class Entity:
 			self.prevPath.nodes.append(self.path.nodes[0])
 			del self.path.nodes[0]
 
-		elif( validPath and self.pos[0] == self.currentTarget.x and self.pos[1] == self.currentTarget.y ):
+		elif( validPath and self.pos[0] == self.currentTarget.pos[0] and self.pos[1] == self.currentTarget.pos[1] ):
 			if( self.debug ): print "current target reached, targetting next"
 			self.prevPath.nodes.append(self.currentTarget)
 			self.currentTarget = self.path.nodes.pop(0)
 
-		if( pEntities ):
-			for entity in pEntities:
+		if( Globals.gEntities ):
+			for entity in Globals.gEntities:
 				if( self.id != entity.id ):
 					entityPos = entity.getTilePos()
 					currentPos = self.currentTarget.getTilePos()
 					if( currentPos[0] == entityPos[0] and currentPos[1] == entityPos[1] ):
-						self.block()
+						self.ChangeState(Globals.gStates["Blocked"])
+					else:
+						self.moving = True
+		else:
+			self.moving = True
 
 		if( not validPath ):
-			if( self.debug ): print "final target reached"
+			if( self.debug ):
+				print "final target reached"
+				print "stop2"
 			# target reached
-			print "stop2"
 			self.stopMoving()
 			return False
 		elif( not self.isBlocked ):
 			if( self.debug ): print "setting direction for the next target"
-			self.direction = self.getDirection( self.pos, ( self.currentTarget.x, self.currentTarget.y ) )
+			self.direction = self.getDirection( self.pos, ( self.currentTarget.pos[0], self.currentTarget.pos[1] ) )
 			self.move()
+			return True
 
 
 	def stopMoving(self):
 		if( self.debug ): print "stop moving"
-		self.path = None
+		# self.path = None
 		self.direction = None
 		self.moving = False
+		self.isBlocked = False
 
 	def move(self):
 		if( self.debug ): print "moving"
+		self.moving = True
 
 		if( self.moving and self.direction ):
+			self.prevPos = self.pos
+
+			tileBeforeMove = self.getTilePos()
+
+			# set prev tile
+
 			if( self.debug ): print "moving and have direction"
 			if( self.debug ): print "direction: %d, %d" % (self.direction[0], self.direction[1])
 			newPos = (self.pos[0] + self.speed * self.direction[0], self.pos[1] + self.speed * self.direction[1]) 
 			self.setPosition( newPos )
+
+			currentTile = self.getTilePos()
+			if( not self.prevTile ):
+				self.prevTile = tileBeforeMove
+			elif( self.prevTile and ( tileBeforeMove[0] == currentTile[0] and tileBeforeMove[1] == currentTile[1] ) ):
+				pass
+			else:
+				self.prevTile = tileBeforeMove
 		else:
-			print "stop1"
+			if( self.debug ): print "stop1"
 			self.stopMoving()
 
 	def update(self, pMap, pPathfinder, pEntities = None):
-		if( self.isBlocked ):
-			print "new path"
-			self.path = pPathfinder.findPath( pMap, self.getTilePos(), (self.path.nodes[-1].x, self.path.nodes[-1].y), pEntities )
-			self.currentTarget = None
-			self.isBlocked = False
+		self.currentState.Execute(self)
+
+		# if(self.debug): print "id: %d" % self.id
+		# if( self.isBlocked and self.path ):
+		# 	if( self.debug ): print "new path"
+		# 	# find a new way from the current position to the target
+		# 	if(self.path):
+		# 		print len(self.path.nodes)
+
+		# 		for node in self.path.nodes:
+		# 			print "%d, %d" % (node.pos[0], node.pos[1])
+		# 	else:
+		# 		print "why no nodes?"
+		# 	# bulle = raw_input(">")
+		# 	self.path = pPathfinder.findPath( pMap, self.getTilePos(), (self.path.nodes[-1].pos[0], self.path.nodes[-1].pos[1]), Globals.gEntities )
+		# elif( self.isBlocked and not self.path ):
+		# 	self.stopMoving()
+		# 	self.setPosition( self.prevTile )
+		# else:
+		# 	self.isBlocked = False
 		
-		if( self.path ):
-			self.moveAlongPath(pEntities)
+		# if( self.path ):
+		# 	self.moveAlongPath(Globals.gEntities)
 
 	def getTilePos(self):
-		return ( int(self.pos[0] + 0.5), int(self.pos[1] + 0.5) )
+		return ( int(round(self.pos[0])), int(round(self.pos[1])) )
 
 	def block(self):
 		self.isBlocked = True

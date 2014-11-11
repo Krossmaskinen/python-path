@@ -2,6 +2,8 @@ from PIL import Image
 import sys
 import pygame
 
+import Globals
+
 from Map import *
 from Node import *
 from Path import *
@@ -20,11 +22,10 @@ def getNewPath(start, end):
 
 def main():
 	gameRunning = True
-	tileSize = 24
 
 	im = Image.open("graphics/map4.png", "r")
 	pixels = list(im.getdata())
-	myMap = Map(tileSize)
+	myMap = Map(Globals.gTileSize)
 	# create a map from the image
 	myMap.loadMap(pixels, im.size[0], im.size[1])
 
@@ -38,9 +39,12 @@ def main():
 
 	ninja1 = Entity("ninja")
 	ninja2 = Entity("ninja")
-	ninja2.setPosition((5, 0))
+	ninja1.setPosition((0, 11))
+	ninja2.setPosition((7, 0))
 
 	ninjas = [ninja1, ninja2]
+
+	Globals.gEntities = [ninja1, ninja2]
 
 	selectedNinja = ninja1
 	ninja1.select()
@@ -53,16 +57,19 @@ def main():
 				if event.key == pygame.K_ESCAPE:
 					sys.exit()
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				mouseTilePos = getTileCoords(event.pos, tileSize)
+				mouseTilePos = getTileCoords(event.pos, Globals.gTileSize)
+				print "mouse pos: ", mouseTilePos
+				print "ninja pos: ", selectedNinja.getTilePos()
 				if event.button == 3:
 					# set end pos
 					startCoord = selectedNinja.getTilePos()
 					endCoord = mouseTilePos
-					path = myPathfinder.findPath(myMap, startCoord, endCoord, ninjas)
+					path = myPathfinder.findPath(myMap, startCoord, endCoord)
 					if( not path ):
 						print "no path"
 					else:
 						selectedNinja.setPath(path)
+						selectedNinja.ChangeState(Globals.gStates["MoveAlongPath"])
 				elif event.button == 1:
 					# select ninja
 					for ninja in ninjas:
@@ -73,7 +80,7 @@ def main():
 							ninja.select()
 
 		for ninja in ninjas:
-			ninja.update(myMap, myPathfinder, ninjas)
+			ninja.update(myMap, myPathfinder)
 
 		graphicsMgr.render(myMap, path, ninjas)
 

@@ -53,7 +53,7 @@ class GraphicsManager:
 	def printPath(self, pPath):
 		for i in range(len(pPath.nodes)):
 			node = pPath.nodes[i]
-			coords = (node.x * self.tileSize, node.y * self.tileSize)
+			coords = (node.pos[0] * self.tileSize, node.pos[1] * self.tileSize)
 			if(i == len(pPath.nodes) - 1):
 				self.screen.blit(self.images["end"], coords)
 			elif(i != 0):

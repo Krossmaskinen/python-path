@@ -5,8 +5,7 @@ class Node:
 
 	def __init__(self, coordinates, type, mapSize, pMap, name = ""):
 		self.name = name
-		self.x = coordinates[0]
-		self.y = coordinates[1]
+		self.pos = ( coordinates[0], coordinates[1] )
 		self.type = type
 
 		self.G = 0 # distance from starting point (will vary depending on what node is accessing it)
@@ -25,8 +24,8 @@ class Node:
 		print(self.name)
 
 	def printCoordinates(self):
-		print(self.x)
-		print(self.y)
+		print(self.pos[0])
+		print(self.pos[1])
 
 	def calculateNeighbours(self, pMap):
 		"""
@@ -36,32 +35,32 @@ class Node:
 			Must be called after the entire map is loaded
 		"""
 
-		if(self.y > 0):
-			coord = self.get1DCoordinate((self.x, self.y - 1))
-			self.neighbours['top'] = self.createNeighbour((self.x, self.y - 1), pMap.nodes[coord], 10)
-			if(self.x > 0):
-				coord = self.get1DCoordinate((self.x - 1, self.y - 1))
-				self.neighbours['top left'] = self.createNeighbour((self.x - 1, self.y - 1), pMap.nodes[coord], 14)
-			if(self.x < self.mapWidth - 1):
-				coord = self.get1DCoordinate((self.x + 1, self.y - 1))
-				self.neighbours['top right'] = self.createNeighbour((self.x + 1, self.y - 1), pMap.nodes[coord], 14)
+		if(self.pos[1] > 0):
+			coord = self.get1DCoordinate((self.pos[0], self.pos[1] - 1))
+			self.neighbours['top'] = self.createNeighbour((self.pos[0], self.pos[1] - 1), pMap.nodes[coord], 10)
+			if(self.pos[0] > 0):
+				coord = self.get1DCoordinate((self.pos[0] - 1, self.pos[1] - 1))
+				self.neighbours['top left'] = self.createNeighbour((self.pos[0] - 1, self.pos[1] - 1), pMap.nodes[coord], 14)
+			if(self.pos[0] < self.mapWidth - 1):
+				coord = self.get1DCoordinate((self.pos[0] + 1, self.pos[1] - 1))
+				self.neighbours['top right'] = self.createNeighbour((self.pos[0] + 1, self.pos[1] - 1), pMap.nodes[coord], 14)
 
-		if(self.x > 0):
-			coord = self.get1DCoordinate((self.x - 1, self.y))
-			self.neighbours['left'] = self.createNeighbour((self.x - 1, self.y), pMap.nodes[coord], 10)
-		if(self.x < self.mapWidth - 1):
-			coord = self.get1DCoordinate((self.x + 1, self.y))
-			self.neighbours['right'] = self.createNeighbour((self.x + 1, self.y), pMap.nodes[coord], 10)
+		if(self.pos[0] > 0):
+			coord = self.get1DCoordinate((self.pos[0] - 1, self.pos[1]))
+			self.neighbours['left'] = self.createNeighbour((self.pos[0] - 1, self.pos[1]), pMap.nodes[coord], 10)
+		if(self.pos[0] < self.mapWidth - 1):
+			coord = self.get1DCoordinate((self.pos[0] + 1, self.pos[1]))
+			self.neighbours['right'] = self.createNeighbour((self.pos[0] + 1, self.pos[1]), pMap.nodes[coord], 10)
 
-		if(self.y < self.mapHeight - 1):
-			coord = self.get1DCoordinate((self.x, self.y + 1))
-			self.neighbours['bottom'] = self.createNeighbour((self.x, self.y + 1), pMap.nodes[coord], 10)
-			if(self.x > 0):
-				coord = self.get1DCoordinate((self.x - 1, self.y + 1))
-				self.neighbours['bottom left'] = self.createNeighbour((self.x - 1, self.y + 1), pMap.nodes[coord], 14)
-			if(self.x < self.mapWidth - 1):
-				coord = self.get1DCoordinate((self.x + 1, self.y + 1))
-				self.neighbours['bottom right'] = self.createNeighbour((self.x + 1, self.y + 1), pMap.nodes[coord], 14)
+		if(self.pos[1] < self.mapHeight - 1):
+			coord = self.get1DCoordinate((self.pos[0], self.pos[1] + 1))
+			self.neighbours['bottom'] = self.createNeighbour((self.pos[0], self.pos[1] + 1), pMap.nodes[coord], 10)
+			if(self.pos[0] > 0):
+				coord = self.get1DCoordinate((self.pos[0] - 1, self.pos[1] + 1))
+				self.neighbours['bottom left'] = self.createNeighbour((self.pos[0] - 1, self.pos[1] + 1), pMap.nodes[coord], 14)
+			if(self.pos[0] < self.mapWidth - 1):
+				coord = self.get1DCoordinate((self.pos[0] + 1, self.pos[1] + 1))
+				self.neighbours['bottom right'] = self.createNeighbour((self.pos[0] + 1, self.pos[1] + 1), pMap.nodes[coord], 14)
 
 		# remove neighbours that cut corners if top, right, bottom or left is a wall
 		if( 'top' in self.neighbours and self.neighbours['top']['node'].type == 1 ):
@@ -85,10 +84,10 @@ class Node:
 		}
 
 	def get1DCoordinate(self):
-		return self.x + self.y * self.mapWidth
+		return self.pos[0] + self.pos[1] * self.mapWidth
 
 	def get1DCoordinate(self, coords):
 		return coords[0] + coords[1] * self.mapWidth
 
 	def getTilePos(self):
-		return ( int(self.x + 0.5), int(self.y + 0.5) )
+		return ( int(self.pos[0] + 0.5), int(self.pos[1] + 0.5) )

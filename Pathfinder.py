@@ -1,11 +1,13 @@
 from Map import *
 from Node import *
 from Path import *
+import Globals
+
 import operator
 
 class Pathfinder:
 	def __init__(self):
-		self.debug = False
+		self.debug = True
 		self.openList = []
 		self.closedList = []
 		self.targetFound = False
@@ -17,7 +19,7 @@ class Pathfinder:
 		for node in nodes:
 			node.parentNode = None
 
-	def findPath(self, pMap, start, end, pEntities = None):
+	def findPath(self, pMap, start, end):
 		self.resetPath(pMap.nodes)
 		"""Initializes the A* to find a way from start to end, based on the nodes in pMap"""
 		if( self.debug ): print "%d, %d \n" % start
@@ -28,10 +30,10 @@ class Pathfinder:
 		targetNode = pMap.getNode((end[0], end[1]))
 
 		# cancel if the target is unreachable
-		if( currentNode.type == pMap.types["wall"] or targetNode.type == pMap.types["wall"]):
+		if( targetNode.type == pMap.types["wall"]):
 			return None
-		elif( pEntities ):
-			pathClear = self.checkEntityCollision( end, pEntities )
+		elif( Globals.gEntities ):
+			pathClear = self.checkEntityCollision( end )
 			if( not pathClear ):
 				return None
 
@@ -41,7 +43,7 @@ class Pathfinder:
 
 		# as long as there're items in the open list and the target is not found, keep searching
 		while(len(self.openList) and not self.targetFound):
-			self.checkNode(pMap, start, end, pEntities)
+			self.checkNode(pMap, start, end )
 
 		# if the target is found, extract the path and return it, otherwise return None
 		if(self.targetFound):
@@ -51,20 +53,20 @@ class Pathfinder:
 		else:
 			return None
 		
-	def checkNode(self, pMap, start, end, pEntities = None):
+	def checkNode(self, pMap, start, end):
 		"""Updates the A* algorithm one step"""
 		# move the first node of open list to the closed list
 		currentNode = self.openList.pop(0)
 		self.closedList.append(currentNode)
 
 		# check if the current node, that is, the last one added to the closed list, is the taget node
-		if( currentNode.x == end[0] and currentNode.y == end[1] ):
+		if( currentNode.pos[0] == end[0] and currentNode.pos[1] == end[1] ):
 			# target found! VICORY! return true!!
 			self.targetFound = True
 			return True
 
 		# add neighbours to openList
-		self.checkNeighbours(currentNode, pMap, start, end, pEntities)
+		self.checkNeighbours(currentNode, pMap, start, end)
 
 		# sort openList on F value
 		self.openList.sort(key = operator.attrgetter("F"))
@@ -72,7 +74,7 @@ class Pathfinder:
 		# no path found yet
 		return False
 
-	def checkNeighbours(self, currentNode, pMap, start, end, pEntities = None):
+	def checkNeighbours(self, currentNode, pMap, start, end):
 		"""Check for walkable neighbours to the current node being checked"""
 		for key in currentNode.neighbours:
 			neighbour = currentNode.neighbours[key]
@@ -87,8 +89,8 @@ class Pathfinder:
 				# check if a horizontal/vertical neighbour is a wall. If so it's not walkable
 				nodeWalkable = True
 
-			if( nodeWalkable and pEntities ):
-				nodeWalkable = self.checkEntityCollision( (neighbour['node'].x, neighbour['node'].y), pEntities )
+			if( nodeWalkable and Globals.gEntities ):
+				nodeWalkable = self.checkEntityCollision( (neighbour['node'].pos[0], neighbour['node'].pos[1]) )
 
 			if( nodeInClosedList == False and nodeWalkable ):
 				# set parent
@@ -134,14 +136,14 @@ class Pathfinder:
 
 	def get1DCoordinate(self, node, mapWidth):
 		"""Returns the map list index for the current node based on the x and y coordinates"""
-		return node.x + node.y * mapWidth
+		return node.pos[0] + node.pos[1] * mapWidth
 
 	def checkIfInList(self, list, node):
 		"""Returns True if the node is in the passed in list, based on the x and y coordinates, else False"""
-		return any((obj.x == node.x and obj.y == node.y) for obj in list)
+		return any((obj.pos[0] == node.pos[0] and obj.pos[1] == node.pos[1]) for obj in list)
 
-	def checkEntityCollision(self, pos, pEntities):
-		for entity in pEntities:
+	def checkEntityCollision(self, pos):
+		for entity in Globals.gEntities:
 			entityPos = entity.getTilePos()
 			if( entityPos[0] == pos[0] and entityPos[1] == pos[1] ):
 				return False
