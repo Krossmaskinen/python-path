@@ -5,8 +5,9 @@ import Globals
 
 class Entity:
 	idCounter = 0
+	_pathfinder = None
 
-	def __init__(self, type):
+	def __init__(self, type, pPathfinder):
 		self.setId()
 		self.debug = False
 		self.type = type
@@ -21,8 +22,10 @@ class Entity:
 		self.moving = False
 		self.isSelected = False
 		self.isBlocked = False
-
 		self.currentState = None
+
+		if( not self._pathfinder ):
+			self._pathfinder = pPathfinder
 
 		self.ChangeState(Globals.gStates["Idle"])
 
@@ -56,25 +59,24 @@ class Entity:
 	
 	def setPosition(self, coords):
 		if( coords ):
-			if( self.currentTarget ):
-				if( self.debug ): print self.currentTarget.pos[0], self.currentTarget.pos[1]
+			if( not self.isBlocked and self.currentTarget ):
 				currentDistance = self.getDistance(self.pos, (self.currentTarget.pos[0], self.currentTarget.pos[1]))
 				newDistance = self.getDistance(coords, (self.currentTarget.pos[0], self.currentTarget.pos[1]))
 
 				# target is reached or passed
 				if(currentDistance < newDistance):
-					if( self.debug ): print "snap"
 					self.pos[0], self.pos[1] = self.currentTarget.pos[0], self.currentTarget.pos[1]
 				else: 
-					if( self.debug ): print "move"
+					if( self.debug ): print "%d: move" % self.id
 					self.pos[0], self.pos[1] = coords[0], coords[1]
 			else:
-				if( self.debug ): print "teleport"
+				if( self.debug ): print "%d: teleport" % self.id
 				self.pos[0], self.pos[1] = coords[0], coords[1]
 
-			if( self.debug ): print "new pos %d, %d" % (self.pos[0], self.pos[1])
+			if( self.debug ): print "%d: after set position %d, %d" % (self.id, self.pos[0], self.pos[1])
 
 	def setPath(self, path):
+		print "%d: setting path" % self.id
 		self.currentTarget = None
 		self.path = path
 		self.prevPath = Path()
@@ -92,6 +94,7 @@ class Entity:
 			self.prevPath.nodes.append(self.path.nodes[0])
 			del self.path.nodes[0]
 
+
 		elif( validPath and self.pos[0] == self.currentTarget.pos[0] and self.pos[1] == self.currentTarget.pos[1] ):
 			if( self.debug ): print "current target reached, targetting next"
 			self.prevPath.nodes.append(self.currentTarget)
@@ -103,7 +106,8 @@ class Entity:
 					entityPos = entity.getTilePos()
 					currentPos = self.currentTarget.getTilePos()
 					if( currentPos[0] == entityPos[0] and currentPos[1] == entityPos[1] ):
-						self.ChangeState(Globals.gStates["Blocked"])
+						# self.ChangeState(Globals.gStates["Blocked"])
+						self.isBlocked = True
 					else:
 						self.moving = True
 		else:
@@ -122,13 +126,14 @@ class Entity:
 			self.move()
 			return True
 
+		return True
+
 
 	def stopMoving(self):
 		if( self.debug ): print "stop moving"
 		# self.path = None
 		self.direction = None
 		self.moving = False
-		self.isBlocked = False
 
 	def move(self):
 		if( self.debug ): print "moving"
@@ -157,7 +162,7 @@ class Entity:
 			if( self.debug ): print "stop1"
 			self.stopMoving()
 
-	def update(self, pMap, pPathfinder, pEntities = None):
+	def update(self):
 		self.currentState.Execute(self)
 
 		# if(self.debug): print "id: %d" % self.id
@@ -184,9 +189,6 @@ class Entity:
 
 	def getTilePos(self):
 		return ( int(round(self.pos[0])), int(round(self.pos[1])) )
-
-	def block(self):
-		self.isBlocked = True
 
 	def select(self):
 		self.isSelected = True

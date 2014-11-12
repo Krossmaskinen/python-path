@@ -11,11 +11,15 @@ class State_MoveAlongPath( State ):
 		print "end: " % pEntity.path.nodes[-1]
 
 	def Execute(self, pEntity):
-		if( pEntity.path ):
-			if( not pEntity.moveAlongPath() ):
-				pEntity.ChangeState(Globals.gStates["Idle"])	
+		if( pEntity.isBlocked ):
+			print "%d: blocked" % pEntity.id
+			pEntity.ChangeState(Globals.gStates["Blocked"])
 		else:
-			pEntity.ChangeState(Globals.gStates["Idle"])
+			if( pEntity.path ):
+				if( not pEntity.moveAlongPath() ):
+					pEntity.ChangeState(Globals.gStates["Idle"])	
+			else:
+				pEntity.ChangeState(Globals.gStates["Idle"])
 
 	def Exit(self, pEntity):
 		print "%d: stopped following path" % pEntity.id

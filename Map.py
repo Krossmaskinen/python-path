@@ -1,5 +1,5 @@
 import sys
-from termcolor import colored, cprint
+# from termcolor import colored, cprint
 from Node import *
 
 class Map:
@@ -13,26 +13,6 @@ class Map:
 		self.width = 0
 		self.height = 0
 		self.tileSize = tileSize
-
-	def printMap(self):
-		wallIcon = "0"
-		output = "\n"
-
-		for y in range(self.height) + 2:
-			for x in range(self.width) + 2:
-				if(x == 0 or x == self.width or y == 0 or y == self.height):
-					output += wallIcon + " "
-					continue
-
-				# get one dimensional coordinate from two dimensional coordinates
-				currentCoord = x + self.width * y
-				if(self.nodes[currentCoord].type == self.types["wall"]):
-					output += wallIcon + " "
-				elif(self.nodes[currentCoord].type == self.types["open"]):
-					output += "  "
-			output += "\n"
-
-		print output
 
 	def loadMap(self, pMap, width, height):
 		self.width = width
@@ -56,27 +36,47 @@ class Map:
 		index = coordinates[0] + self.width * coordinates[1]
 		return self.nodes[index]
 
-	def printMapWithPath(self, path):
-		wallIcon = "0"
-		pathIcon = "X"
-		output = "\n"
+	# def printMap(self):
+	# 	wallIcon = "0"
+	# 	output = "\n"
 
-		for y in range(self.height):
-			for x in range(self.width):
-				if( len(path.nodes) > 0 and path.nodes[-1].x == x and path.nodes[-1].y == y ):
-					output += colored(pathIcon + " ", "red")
-				elif( len(path.nodes) > 0 and path.nodes[0].x == x and path.nodes[0].y == y ):
-					output += colored(pathIcon + " ", "yellow")
-				elif( path.checkCoordsInList(path.nodes, (x, y)) ):
-					output += colored(pathIcon + " ", 'green')
-				else:
-					# get one dimensional coordinate from two dimensional coordinates
-					currentCoord = x + self.width * y
-					if(self.nodes[currentCoord].type == self.types["wall"]):
-						output += wallIcon + " "
-					elif(self.nodes[currentCoord].type == self.types["open"]):
-						output += "  "
+	# 	for y in range(self.height) + 2:
+	# 		for x in range(self.width) + 2:
+	# 			if(x == 0 or x == self.width or y == 0 or y == self.height):
+	# 				output += wallIcon + " "
+	# 				continue
 
-			output += "\n"
+	# 			# get one dimensional coordinate from two dimensional coordinates
+	# 			currentCoord = x + self.width * y
+	# 			if(self.nodes[currentCoord].type == self.types["wall"]):
+	# 				output += wallIcon + " "
+	# 			elif(self.nodes[currentCoord].type == self.types["open"]):
+	# 				output += "  "
+	# 		output += "\n"
 
-		print output
+	# 	print output
+
+	# def printMapWithPath(self, path):
+	# 	wallIcon = "0"
+	# 	pathIcon = "X"
+	# 	output = "\n"
+
+	# 	for y in range(self.height):
+	# 		for x in range(self.width):
+	# 			if( len(path.nodes) > 0 and path.nodes[-1].x == x and path.nodes[-1].y == y ):
+	# 				output += colored(pathIcon + " ", "red")
+	# 			elif( len(path.nodes) > 0 and path.nodes[0].x == x and path.nodes[0].y == y ):
+	# 				output += colored(pathIcon + " ", "yellow")
+	# 			elif( path.checkCoordsInList(path.nodes, (x, y)) ):
+	# 				output += colored(pathIcon + " ", 'green')
+	# 			else:
+	# 				# get one dimensional coordinate from two dimensional coordinates
+	# 				currentCoord = x + self.width * y
+	# 				if(self.nodes[currentCoord].type == self.types["wall"]):
+	# 					output += wallIcon + " "
+	# 				elif(self.nodes[currentCoord].type == self.types["open"]):
+	# 					output += "  "
+
+	# 		output += "\n"
+
+	# 	print output

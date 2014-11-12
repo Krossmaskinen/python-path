@@ -6,11 +6,16 @@ import Globals
 import operator
 
 class Pathfinder:
-	def __init__(self):
+	_map = None
+
+	def __init__(self, pMap):
 		self.debug = True
 		self.openList = []
 		self.closedList = []
 		self.targetFound = False
+
+		if( not self._map ):
+			self._map = pMap
 
 	def resetPath(self, nodes):
 		del self.closedList[:]
@@ -19,18 +24,15 @@ class Pathfinder:
 		for node in nodes:
 			node.parentNode = None
 
-	def findPath(self, pMap, start, end):
-		self.resetPath(pMap.nodes)
-		"""Initializes the A* to find a way from start to end, based on the nodes in pMap"""
-		if( self.debug ): print "%d, %d \n" % start
-		if( self.debug ): print "%d, %d \n" % end
-		
+	def findPath(self, start, end):
+		self.resetPath(self._map.nodes)
+		"""Initializes the A* to find a way from start to end, based on the nodes in self._map"""		
 		self.targetFound = False
-		currentNode = pMap.getNode((start[0], start[1]))
-		targetNode = pMap.getNode((end[0], end[1]))
+		currentNode = self._map.getNode((start[0], start[1]))
+		targetNode = self._map.getNode((end[0], end[1]))
 
 		# cancel if the target is unreachable
-		if( targetNode.type == pMap.types["wall"]):
+		if( targetNode.type == self._map.types["wall"]):
 			return None
 		elif( Globals.gEntities ):
 			pathClear = self.checkEntityCollision( end )
@@ -43,7 +45,7 @@ class Pathfinder:
 
 		# as long as there're items in the open list and the target is not found, keep searching
 		while(len(self.openList) and not self.targetFound):
-			self.checkNode(pMap, start, end )
+			self.checkNode(start, end )
 
 		# if the target is found, extract the path and return it, otherwise return None
 		if(self.targetFound):
@@ -53,7 +55,7 @@ class Pathfinder:
 		else:
 			return None
 		
-	def checkNode(self, pMap, start, end):
+	def checkNode(self, start, end):
 		"""Updates the A* algorithm one step"""
 		# move the first node of open list to the closed list
 		currentNode = self.openList.pop(0)
@@ -66,7 +68,7 @@ class Pathfinder:
 			return True
 
 		# add neighbours to openList
-		self.checkNeighbours(currentNode, pMap, start, end)
+		self.checkNeighbours(currentNode, start, end)
 
 		# sort openList on F value
 		self.openList.sort(key = operator.attrgetter("F"))
@@ -74,7 +76,7 @@ class Pathfinder:
 		# no path found yet
 		return False
 
-	def checkNeighbours(self, currentNode, pMap, start, end):
+	def checkNeighbours(self, currentNode, start, end):
 		"""Check for walkable neighbours to the current node being checked"""
 		for key in currentNode.neighbours:
 			neighbour = currentNode.neighbours[key]
@@ -85,7 +87,7 @@ class Pathfinder:
 
 			# check if node is walkable
 			nodeWalkable = False
-			if(neighbour['node'].type == pMap.types["open"]):
+			if(neighbour['node'].type == self._map.types["open"]):
 				# check if a horizontal/vertical neighbour is a wall. If so it's not walkable
 				nodeWalkable = True
 

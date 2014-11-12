@@ -1,6 +1,7 @@
 from PIL import Image
 import sys
 import pygame
+import time
 
 import Globals
 
@@ -30,24 +31,32 @@ def main():
 	myMap.loadMap(pixels, im.size[0], im.size[1])
 
 	graphicsMgr = GraphicsManager(myMap)
-	myPathfinder = Pathfinder()
+	myPathfinder = Pathfinder(myMap)
 
 	path = None
 	
 	startCoord = (0, 0)
 	endCoord = (0, 0)
 
-	ninja1 = Entity("ninja")
-	ninja2 = Entity("ninja")
-	ninja1.setPosition((0, 11))
-	ninja2.setPosition((7, 0))
+	ninja1 = Entity("ninja", myPathfinder)
+	ninja2 = Entity("ninja", myPathfinder)
+	ninja1.setPosition((0, 6))
+	ninja2.setPosition((5, 0))
+
 
 	ninjas = [ninja1, ninja2]
 
 	Globals.gEntities = [ninja1, ninja2]
 
+	ninja1.setPath( myPathfinder.findPath( ninja1.getTilePos(), (9, 0) ) )
+	ninja2.setPath( myPathfinder.findPath( ninja2.getTilePos(), (2, 10) ) )
+	ninja1.ChangeState(Globals.gStates["MoveAlongPath"])
+	ninja2.ChangeState(Globals.gStates["MoveAlongPath"])
+
 	selectedNinja = ninja1
 	ninja1.select()
+
+	Globals.gDeltaTime = time.clock() - Globals.gDeltaTime
 
 	while(gameRunning):
 		for event in pygame.event.get():
@@ -58,19 +67,18 @@ def main():
 					sys.exit()
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				mouseTilePos = getTileCoords(event.pos, Globals.gTileSize)
-				print "mouse pos: ", mouseTilePos
-				print "ninja pos: ", selectedNinja.getTilePos()
 				if event.button == 3:
 					# set end pos
 					startCoord = selectedNinja.getTilePos()
 					endCoord = mouseTilePos
-					path = myPathfinder.findPath(myMap, startCoord, endCoord)
+					path = myPathfinder.findPath(startCoord, endCoord)
 					if( not path ):
 						print "no path"
 					else:
 						selectedNinja.setPath(path)
 						selectedNinja.ChangeState(Globals.gStates["MoveAlongPath"])
 				elif event.button == 1:
+					print "mouse coord: ", mouseTilePos
 					# select ninja
 					for ninja in ninjas:
 						ninja.unselect()
@@ -80,7 +88,7 @@ def main():
 							ninja.select()
 
 		for ninja in ninjas:
-			ninja.update(myMap, myPathfinder)
+			ninja.update()
 
 		graphicsMgr.render(myMap, path, ninjas)
 
